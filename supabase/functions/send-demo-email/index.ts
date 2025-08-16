@@ -94,7 +94,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log("Attempting to send email to:", bookingData.adminEmail);
 
-    // Send email to admin
+    // Send email to admin using the verified email address
     const emailResponse = await resend.emails.send({
       from: "EduSchools Demo <onboarding@resend.dev>",
       to: [bookingData.adminEmail],

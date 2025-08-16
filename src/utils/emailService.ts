@@ -32,7 +32,8 @@ export const sendBookDemoEmail = async (formData: BookDemoFormData): Promise<voi
       },
       body: JSON.stringify({
         ...formData,
-        adminEmail: 'admin@eduschools.co.za',
+        // Use the verified email address that was set up with Resend
+        adminEmail: 'eduschoolzug@gmail.com',
         submissionDate: new Date().toISOString()
       }),
     });
