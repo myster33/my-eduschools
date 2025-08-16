@@ -108,7 +108,7 @@ const BookDemo = () => {
   const generateCalendarWeeks = (month: Date) => {
     const monthStart = startOfMonth(month);
     const monthEnd = endOfMonth(month);
-    const calendarStart = startOfWeek(monthStart, { weekStartsOn: 0 }); // Start on Sunday
+    const calendarStart = startOfWeek(monthStart, { weekStartsOn: 0 });
     const calendarEnd = endOfWeek(monthEnd, { weekStartsOn: 0 });
 
     const weeks = [];
@@ -258,57 +258,71 @@ const BookDemo = () => {
 
   const saveBookingToSupabase = async (bookingData: BookDemoFormData) => {
     try {
+      console.log('Starting Supabase save with data:', bookingData);
+      
       // Parse the date and time to create a proper datetime
       const parsedDate = parse(bookingData.preferredDemoDate, 'EEEE, MMMM d, yyyy', new Date());
       const [hours, minutes] = bookingData.preferredDemoTime.split(':').map(Number);
       const bookingDateTime = new Date(parsedDate);
       bookingDateTime.setHours(hours, minutes, 0, 0);
 
-      const { data, error } = await (supabase as any)
+      console.log('Parsed booking datetime:', bookingDateTime.toISOString());
+
+      const insertData = {
+        name: bookingData.name,
+        email: bookingData.email,
+        school_name: bookingData.schoolName,
+        position: bookingData.position,
+        phone_number: bookingData.phoneNumber || null,
+        school_type: bookingData.schoolType,
+        student_count: bookingData.studentCount,
+        current_system: bookingData.currentSystem || null,
+        specific_needs: bookingData.specificNeeds,
+        preferred_contact_method: bookingData.preferredContactMethod,
+        timeframe: bookingData.timeframe,
+        additional_comments: bookingData.additionalComments || null,
+        preferred_demo_date: bookingData.preferredDemoDate,
+        preferred_demo_time: bookingData.preferredDemoTime,
+        demo_mode: bookingData.demoMode,
+        school_address: bookingData.schoolAddress,
+        booking_datetime: bookingDateTime.toISOString(),
+        status: 'pending'
+      };
+
+      console.log('Insert data prepared:', insertData);
+
+      const { data, error } = await supabase
         .from('demo_bookings')
-        .insert([
-          {
-            name: bookingData.name,
-            email: bookingData.email,
-            school_name: bookingData.schoolName,
-            position: bookingData.position,
-            phone_number: bookingData.phoneNumber || null,
-            school_type: bookingData.schoolType,
-            student_count: bookingData.studentCount,
-            current_system: bookingData.currentSystem || null,
-            specific_needs: bookingData.specificNeeds,
-            preferred_contact_method: bookingData.preferredContactMethod,
-            timeframe: bookingData.timeframe,
-            additional_comments: bookingData.additionalComments || null,
-            preferred_demo_date: bookingData.preferredDemoDate,
-            preferred_demo_time: bookingData.preferredDemoTime,
-            demo_mode: bookingData.demoMode,
-            school_address: bookingData.schoolAddress,
-            booking_datetime: bookingDateTime.toISOString(),
-            status: 'pending'
-          }
-        ])
+        .insert([insertData])
         .select();
 
       if (error) {
-        console.error('Supabase error:', error);
-        throw error;
+        console.error('Supabase insert error:', error);
+        console.error('Error details:', {
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          code: error.code
+        });
+        throw new Error(`Database error: ${error.message}`);
       }
 
-      console.log('Booking saved to Supabase:', data);
+      console.log('Booking saved successfully to Supabase:', data);
       
       // Refresh booked slots after successful booking
       await loadBookedSlots();
       
       return data;
     } catch (error) {
-      console.error('Error saving booking to Supabase:', error);
+      console.error('Error in saveBookingToSupabase:', error);
       throw error;
     }
   };
 
   const handleFormSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    console.log('Form submission started with data:', formData);
     
     // Validate required fields
     const requiredFields = [
@@ -319,6 +333,7 @@ const BookDemo = () => {
     const missingFields = requiredFields.filter(field => !formData[field as keyof BookDemoFormData]);
     
     if (missingFields.length > 0) {
+      console.error('Missing required fields:', missingFields);
       toast({
         title: "Missing Required Fields",
         description: "Please fill in all required fields marked with *",
@@ -332,6 +347,7 @@ const BookDemo = () => {
     const dateTimeKey = `${format(parsedDate, 'yyyy-MM-dd')}-${formData.preferredDemoTime}`;
     
     if (bookedSlots.has(dateTimeKey)) {
+      console.error('Time slot no longer available:', dateTimeKey);
       toast({
         title: "Time Slot No Longer Available",
         description: "This time slot has been booked by another user. Please select a different time.",
@@ -349,11 +365,17 @@ const BookDemo = () => {
     setIsSubmitting(true);
 
     try {
+      console.log('Starting confirmed submission process...');
+      
       // Save to Supabase first
+      console.log('Step 1: Saving to Supabase...');
       await saveBookingToSupabase(formData);
+      console.log('Step 1 completed: Data saved to Supabase');
       
       // Then send email
+      console.log('Step 2: Sending email...');
       await sendBookDemoEmail(formData);
+      console.log('Step 2 completed: Email sent successfully');
       
       setIsSubmitting(false);
       setShowSuccessDialog(true);
@@ -378,12 +400,19 @@ const BookDemo = () => {
         schoolAddress: ''
       });
       setSpecificFeatures([]);
+      
+      console.log('Form submission completed successfully');
     } catch (error) {
       console.error('Error processing demo request:', error);
       setIsSubmitting(false);
+      
+      // Show more specific error message
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      console.error('Detailed error:', errorMessage);
+      
       toast({
-        title: "Error",
-        description: "Failed to process demo request. Please try again or contact us directly.",
+        title: "Submission Failed",
+        description: `Failed to process demo request: ${errorMessage}. Please try again or contact us directly.`,
         variant: "destructive",
       });
     }
