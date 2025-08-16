@@ -8,7 +8,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { MessageCircle, Phone, Mail, MapPin } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { MessageCircle, Phone, Mail, MapPin, CheckCircle } from 'lucide-react';
 import { sendContactMessage, type ContactFormData } from '@/utils/contactService';
 import { toast } from 'sonner';
 
@@ -21,6 +22,7 @@ const Contact = () => {
     message: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showSuccessDialog, setShowSuccessDialog] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,7 +36,7 @@ const Contact = () => {
     
     try {
       await sendContactMessage(formData);
-      toast.success('Message sent successfully! We\'ll get back to you within 24 hours.');
+      setShowSuccessDialog(true);
       
       // Reset form
       setFormData({
@@ -251,6 +253,29 @@ const Contact = () => {
           </Card>
         </div>
       </section>
+
+      {/* Success Dialog */}
+      <Dialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader className="text-center">
+            <div className="flex justify-center mb-4">
+              <CheckCircle className="h-16 w-16 text-green-500" />
+            </div>
+            <DialogTitle className="text-2xl text-green-600">Message Sent Successfully!</DialogTitle>
+            <DialogDescription className="text-gray-600 mt-4">
+              Thank you for contacting us. We've received your message and will get back to you within 24 hours.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-center mt-6">
+            <Button 
+              onClick={() => setShowSuccessDialog(false)}
+              className="px-8"
+            >
+              Close
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <Footer />
       <FloatingCTA />
