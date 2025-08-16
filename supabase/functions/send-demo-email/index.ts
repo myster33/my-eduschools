@@ -37,44 +37,62 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
+    console.log("Send demo email function called");
+    
     const bookingData: BookDemoEmailRequest = await req.json();
-
     console.log("Received booking data:", bookingData);
+
+    // Validate required fields
+    if (!bookingData.name || !bookingData.email || !bookingData.schoolName) {
+      console.error("Missing required fields");
+      return new Response(
+        JSON.stringify({ error: "Missing required fields: name, email, or school name" }),
+        {
+          status: 400,
+          headers: { "Content-Type": "application/json", ...corsHeaders },
+        }
+      );
+    }
 
     // Format the email content
     const emailContent = `
-      <h2>New Demo Booking Request</h2>
-      
-      <h3>Personal Information:</h3>
-      <ul>
-        <li><strong>Name:</strong> ${bookingData.name}</li>
-        <li><strong>Email:</strong> ${bookingData.email}</li>
-        <li><strong>Position:</strong> ${bookingData.position}</li>
-        ${bookingData.phoneNumber ? `<li><strong>Phone:</strong> ${bookingData.phoneNumber}</li>` : ''}
-      </ul>
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h2 style="color: #2563eb;">New Demo Booking Request</h2>
+        
+        <h3 style="color: #1e40af; border-bottom: 2px solid #3b82f6; padding-bottom: 5px;">Personal Information:</h3>
+        <ul style="line-height: 1.6;">
+          <li><strong>Name:</strong> ${bookingData.name}</li>
+          <li><strong>Email:</strong> ${bookingData.email}</li>
+          <li><strong>Position:</strong> ${bookingData.position}</li>
+          ${bookingData.phoneNumber ? `<li><strong>Phone:</strong> ${bookingData.phoneNumber}</li>` : ''}
+        </ul>
 
-      <h3>School Information:</h3>
-      <ul>
-        <li><strong>School Name:</strong> ${bookingData.schoolName}</li>
-        <li><strong>School Address:</strong> ${bookingData.schoolAddress}</li>
-        <li><strong>School Type:</strong> ${bookingData.schoolType}</li>
-        <li><strong>Student Count:</strong> ${bookingData.studentCount}</li>
-        ${bookingData.currentSystem ? `<li><strong>Current System:</strong> ${bookingData.currentSystem}</li>` : ''}
-      </ul>
+        <h3 style="color: #1e40af; border-bottom: 2px solid #3b82f6; padding-bottom: 5px;">School Information:</h3>
+        <ul style="line-height: 1.6;">
+          <li><strong>School Name:</strong> ${bookingData.schoolName}</li>
+          <li><strong>School Address:</strong> ${bookingData.schoolAddress}</li>
+          <li><strong>School Type:</strong> ${bookingData.schoolType}</li>
+          <li><strong>Student Count:</strong> ${bookingData.studentCount}</li>
+          ${bookingData.currentSystem ? `<li><strong>Current System:</strong> ${bookingData.currentSystem}</li>` : ''}
+        </ul>
 
-      <h3>Demo Preferences:</h3>
-      <ul>
-        <li><strong>Preferred Demo Date:</strong> ${bookingData.preferredDemoDate}</li>
-        <li><strong>Preferred Demo Time:</strong> ${bookingData.preferredDemoTime}</li>
-        <li><strong>Demo Mode:</strong> ${bookingData.demoMode}</li>
-        <li><strong>Preferred Contact Method:</strong> ${bookingData.preferredContactMethod}</li>
-        <li><strong>Implementation Timeframe:</strong> ${bookingData.timeframe}</li>
-        ${bookingData.specificNeeds.length > 0 ? `<li><strong>Interested Features:</strong><br>${bookingData.specificNeeds.map(feature => `• ${feature}`).join('<br>')}</li>` : ''}
-        ${bookingData.additionalComments ? `<li><strong>Additional Comments:</strong> ${bookingData.additionalComments}</li>` : ''}
-      </ul>
+        <h3 style="color: #1e40af; border-bottom: 2px solid #3b82f6; padding-bottom: 5px;">Demo Preferences:</h3>
+        <ul style="line-height: 1.6;">
+          <li><strong>Preferred Demo Date:</strong> ${bookingData.preferredDemoDate}</li>
+          <li><strong>Preferred Demo Time:</strong> ${bookingData.preferredDemoTime}</li>
+          <li><strong>Demo Mode:</strong> ${bookingData.demoMode}</li>
+          <li><strong>Preferred Contact Method:</strong> ${bookingData.preferredContactMethod}</li>
+          <li><strong>Implementation Timeframe:</strong> ${bookingData.timeframe}</li>
+          ${bookingData.specificNeeds && bookingData.specificNeeds.length > 0 ? `<li><strong>Interested Features:</strong><br><div style="margin-left: 20px;">${bookingData.specificNeeds.map(feature => `• ${feature}`).join('<br>')}</div></li>` : ''}
+          ${bookingData.additionalComments ? `<li><strong>Additional Comments:</strong> ${bookingData.additionalComments}</li>` : ''}
+        </ul>
 
-      <p><strong>Submitted on:</strong> ${new Date().toLocaleString()}</p>
+        <hr style="margin: 20px 0; border: 1px solid #e5e7eb;">
+        <p style="color: #6b7280;"><strong>Submitted on:</strong> ${new Date().toLocaleString()}</p>
+      </div>
     `;
+
+    console.log("Attempting to send email to:", bookingData.adminEmail);
 
     // Send email to admin
     const emailResponse = await resend.emails.send({
@@ -84,9 +102,18 @@ const handler = async (req: Request): Promise<Response> => {
       html: emailContent,
     });
 
-    console.log("Email sent successfully:", emailResponse);
+    console.log("Email response:", emailResponse);
 
-    return new Response(JSON.stringify({ success: true, emailId: emailResponse.data?.id }), {
+    if (emailResponse.error) {
+      console.error("Resend API error:", emailResponse.error);
+      throw new Error(`Email service error: ${emailResponse.error.message || 'Unknown error'}`);
+    }
+
+    return new Response(JSON.stringify({ 
+      success: true, 
+      emailId: emailResponse.data?.id,
+      message: "Demo request sent successfully"
+    }), {
       status: 200,
       headers: {
         "Content-Type": "application/json",
@@ -96,7 +123,10 @@ const handler = async (req: Request): Promise<Response> => {
   } catch (error: any) {
     console.error("Error in send-demo-email function:", error);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ 
+        error: error.message || "Internal server error",
+        details: error.toString()
+      }),
       {
         status: 500,
         headers: { "Content-Type": "application/json", ...corsHeaders },

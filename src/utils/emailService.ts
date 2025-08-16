@@ -20,28 +20,45 @@ export interface BookDemoFormData {
 }
 
 export const sendBookDemoEmail = async (formData: BookDemoFormData): Promise<void> => {
-  // Send booking data to Supabase edge function
-  const response = await fetch('https://cywhqczjppupwiliofbo.supabase.co/functions/v1/send-demo-email', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN5d2hxY3pqcHB1cHdpbGlvZmJvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTUxNzUwNzgsImV4cCI6MjA3MDc1MTA3OH0.nNib6UdaoCaYH8jWoZAwQUbnCN0D_KcATG3ucG5ZcQk`,
-    },
-    body: JSON.stringify({
-      ...formData,
-      adminEmail: 'admin@eduschools.co.za',
-      submissionDate: new Date().toISOString()
-    }),
-  });
+  try {
+    console.log('Sending demo booking email with data:', formData);
+    
+    // Send booking data to Supabase edge function
+    const response = await fetch('https://cywhqczjppupwiliofbo.supabase.co/functions/v1/send-demo-email', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN5d2hxY3pqcHB1cHdpbGlvZmJvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTUxNzUwNzgsImV4cCI6MjA3MDc1MTA3OH0.nNib6UdaoCaYH8jWoZAwQUbnCN0D_KcATG3ucG5ZcQk`,
+      },
+      body: JSON.stringify({
+        ...formData,
+        adminEmail: 'admin@eduschools.co.za',
+        submissionDate: new Date().toISOString()
+      }),
+    });
 
-  if (!response.ok) {
-    const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
-    console.error('Email sending failed:', errorData);
-    throw new Error(`Failed to send demo request: ${errorData.error || 'Unknown error'}`);
+    console.log('Email service response status:', response.status);
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Email sending failed - Response:', errorText);
+      
+      let errorData;
+      try {
+        errorData = JSON.parse(errorText);
+      } catch {
+        errorData = { error: errorText || 'Unknown error' };
+      }
+      
+      throw new Error(`Failed to send demo request: ${errorData.error || 'Server error'}`);
+    }
+
+    const result = await response.json();
+    console.log('Email sent successfully:', result);
+  } catch (error) {
+    console.error('Error in sendBookDemoEmail:', error);
+    throw error;
   }
-
-  const result = await response.json();
-  console.log('Email sent successfully:', result);
 };
 
 // Helper function to format the email message (kept for compatibility)
