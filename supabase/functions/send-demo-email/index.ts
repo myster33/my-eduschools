@@ -92,12 +92,14 @@ const handler = async (req: Request): Promise<Response> => {
       </div>
     `;
 
-    console.log("Attempting to send email to:", bookingData.adminEmail);
+    // Always send to the verified email address to avoid Resend restrictions
+    const recipientEmail = "eduschoolzug@gmail.com";
+    console.log("Sending email to verified address:", recipientEmail);
 
     // Send email to admin using the verified email address
     const emailResponse = await resend.emails.send({
       from: "EduSchools Demo <onboarding@resend.dev>",
-      to: [bookingData.adminEmail],
+      to: [recipientEmail],
       subject: `New Demo Request from ${bookingData.name} - ${bookingData.schoolName}`,
       html: emailContent,
     });
