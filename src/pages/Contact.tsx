@@ -9,23 +9,50 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { MessageCircle, Phone, Mail, MapPin } from 'lucide-react';
+import { sendContactMessage, type ContactFormData } from '@/utils/contactService';
+import { toast } from 'sonner';
 
 const Contact = () => {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<ContactFormData>({
     name: '',
     email: '',
     phone: '',
     subject: '',
     message: ''
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle form submission here
-    console.log('Form submitted:', formData);
+    
+    if (!formData.name || !formData.email || !formData.subject || !formData.message) {
+      toast.error('Please fill in all required fields');
+      return;
+    }
+
+    setIsSubmitting(true);
+    
+    try {
+      await sendContactMessage(formData);
+      toast.success('Message sent successfully! We\'ll get back to you within 24 hours.');
+      
+      // Reset form
+      setFormData({
+        name: '',
+        email: '',
+        phone: '',
+        subject: '',
+        message: ''
+      });
+    } catch (error) {
+      console.error('Failed to send message:', error);
+      toast.error('Failed to send message. Please try again or contact us directly.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  const handleInputChange = (field: string, value: string) => {
+  const handleInputChange = (field: keyof ContactFormData, value: string) => {
     setFormData(prev => ({
       ...prev,
       [field]: value
@@ -155,6 +182,7 @@ const Contact = () => {
                       value={formData.name}
                       onChange={(e) => handleInputChange('name', e.target.value)}
                       className="mt-1"
+                      disabled={isSubmitting}
                     />
                   </div>
                   <div>
@@ -166,6 +194,7 @@ const Contact = () => {
                       value={formData.email}
                       onChange={(e) => handleInputChange('email', e.target.value)}
                       className="mt-1"
+                      disabled={isSubmitting}
                     />
                   </div>
                 </div>
@@ -179,6 +208,7 @@ const Contact = () => {
                       value={formData.phone}
                       onChange={(e) => handleInputChange('phone', e.target.value)}
                       className="mt-1"
+                      disabled={isSubmitting}
                     />
                   </div>
                   <div>
@@ -190,6 +220,7 @@ const Contact = () => {
                       value={formData.subject}
                       onChange={(e) => handleInputChange('subject', e.target.value)}
                       className="mt-1"
+                      disabled={isSubmitting}
                     />
                   </div>
                 </div>
@@ -204,11 +235,16 @@ const Contact = () => {
                     className="mt-1"
                     rows={6}
                     placeholder="Tell us about your school and how we can help..."
+                    disabled={isSubmitting}
                   />
                 </div>
 
-                <Button type="submit" className="w-full text-lg py-3">
-                  Send Message
+                <Button 
+                  type="submit" 
+                  className="w-full text-lg py-3"
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? 'Sending...' : 'Send Message'}
                 </Button>
               </form>
             </CardContent>
