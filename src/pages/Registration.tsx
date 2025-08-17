@@ -9,6 +9,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { CheckCircle } from 'lucide-react';
+import { sendRegistration, type RegistrationFormData } from '@/utils/registrationService';
+import { toast } from 'sonner';
 
 const Registration = () => {
   const location = useLocation();
@@ -25,10 +29,37 @@ const Registration = () => {
     message: ''
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showSuccessDialog, setShowSuccessDialog] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle form submission here
-    console.log('Form submitted:', formData);
+    
+    if (isSubmitting) return;
+    
+    setIsSubmitting(true);
+    
+    try {
+      await sendRegistration(formData);
+      setShowSuccessDialog(true);
+      
+      // Reset form
+      setFormData({
+        schoolName: '',
+        contactPerson: '',
+        email: '',
+        phone: '',
+        address: '',
+        studentCount: '',
+        plan: selectedPlan,
+        message: ''
+      });
+    } catch (error) {
+      console.error('Registration submission error:', error);
+      toast.error(error instanceof Error ? error.message : 'Failed to submit registration. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleInputChange = (field: string, value: string) => {
@@ -77,6 +108,7 @@ const Registration = () => {
                         value={formData.schoolName}
                         onChange={(e) => handleInputChange('schoolName', e.target.value)}
                         className="mt-1"
+                        disabled={isSubmitting}
                       />
                     </div>
                     <div>
@@ -88,6 +120,7 @@ const Registration = () => {
                         value={formData.contactPerson}
                         onChange={(e) => handleInputChange('contactPerson', e.target.value)}
                         className="mt-1"
+                        disabled={isSubmitting}
                       />
                     </div>
                   </div>
@@ -102,6 +135,7 @@ const Registration = () => {
                         value={formData.email}
                         onChange={(e) => handleInputChange('email', e.target.value)}
                         className="mt-1"
+                        disabled={isSubmitting}
                       />
                     </div>
                     <div>
@@ -113,6 +147,7 @@ const Registration = () => {
                         value={formData.phone}
                         onChange={(e) => handleInputChange('phone', e.target.value)}
                         className="mt-1"
+                        disabled={isSubmitting}
                       />
                     </div>
                   </div>
@@ -126,13 +161,18 @@ const Registration = () => {
                       onChange={(e) => handleInputChange('address', e.target.value)}
                       className="mt-1"
                       rows={3}
+                      disabled={isSubmitting}
                     />
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                       <Label htmlFor="studentCount">Number of Students *</Label>
-                      <Select value={formData.studentCount} onValueChange={(value) => handleInputChange('studentCount', value)}>
+                      <Select 
+                        value={formData.studentCount} 
+                        onValueChange={(value) => handleInputChange('studentCount', value)}
+                        disabled={isSubmitting}
+                      >
                         <SelectTrigger className="mt-1">
                           <SelectValue placeholder="Select student count" />
                         </SelectTrigger>
@@ -147,7 +187,11 @@ const Registration = () => {
                     </div>
                     <div>
                       <Label htmlFor="plan">Selected Plan</Label>
-                      <Select value={formData.plan} onValueChange={(value) => handleInputChange('plan', value)}>
+                      <Select 
+                        value={formData.plan} 
+                        onValueChange={(value) => handleInputChange('plan', value)}
+                        disabled={isSubmitting}
+                      >
                         <SelectTrigger className="mt-1">
                           <SelectValue />
                         </SelectTrigger>
@@ -170,11 +214,16 @@ const Registration = () => {
                       className="mt-1"
                       rows={4}
                       placeholder="Tell us about your school's specific needs..."
+                      disabled={isSubmitting}
                     />
                   </div>
 
-                  <Button type="submit" className="w-full text-lg py-3">
-                    Submit Registration
+                  <Button 
+                    type="submit" 
+                    className="w-full text-lg py-3"
+                    disabled={isSubmitting}
+                  >
+                    {isSubmitting ? 'Submitting Registration...' : 'Submit Registration'}
                   </Button>
                 </form>
               </CardContent>
@@ -182,6 +231,29 @@ const Registration = () => {
           </div>
         </div>
       </section>
+
+      {/* Success Dialog */}
+      <Dialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader className="text-center">
+            <div className="flex justify-center mb-4">
+              <CheckCircle className="h-16 w-16 text-green-500" />
+            </div>
+            <DialogTitle className="text-2xl text-green-600">Registration Submitted Successfully!</DialogTitle>
+            <DialogDescription className="text-gray-600 mt-4">
+              Thank you for registering your school with EduSchools. We've received your registration and will contact you shortly to discuss next steps.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-center mt-6">
+            <Button 
+              onClick={() => setShowSuccessDialog(false)}
+              className="px-8"
+            >
+              Close
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <Footer />
     </div>

@@ -134,6 +134,48 @@ export type Database = {
         }
         Relationships: []
       }
+      school_registrations: {
+        Row: {
+          address: string
+          contact_person: string
+          created_at: string
+          email: string
+          id: string
+          message: string | null
+          phone: string
+          plan: string
+          school_name: string
+          status: string
+          student_count: string
+        }
+        Insert: {
+          address: string
+          contact_person: string
+          created_at?: string
+          email: string
+          id?: string
+          message?: string | null
+          phone: string
+          plan: string
+          school_name: string
+          status?: string
+          student_count: string
+        }
+        Update: {
+          address?: string
+          contact_person?: string
+          created_at?: string
+          email?: string
+          id?: string
+          message?: string | null
+          phone?: string
+          plan?: string
+          school_name?: string
+          status?: string
+          student_count?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string | null
