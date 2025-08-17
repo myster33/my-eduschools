@@ -44,6 +44,9 @@ const Footer = () => {
               <a href="mailto:support@eduschools.co.za" className="text-gray-300 hover:text-white transition-colors">
                 Email
               </a>
+              <a href="https://www.linkedin.com/company/eduschools-pty-ltd" target="_blank" rel="noopener noreferrer" className="text-gray-300 hover:text-white transition-colors">
+                LinkedIn
+              </a>
             </div>
           </div>
         </div>
