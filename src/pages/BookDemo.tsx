@@ -567,7 +567,7 @@ const BookDemo = () => {
                 </div>
               </div>
 
-              {/* Presentation Preferences */}
+              {/* Installation Presentation Preferences */}
               <div className="space-y-4">
                 <h2 className="text-2xl font-semibold text-gray-800 border-b pb-2">Installation Presentation Preferences</h2>
                 
@@ -743,11 +743,11 @@ const BookDemo = () => {
                   >
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="online" id="online-demo" />
-                      <Label htmlFor="online-demo">Online Installation Presentation</Label>
+                      <Label htmlFor="online-demo">Virtual Meeting</Label>
                     </div>
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="onsite" id="onsite-demo" />
-                      <Label htmlFor="onsite-demo">Onsite Installation Presentation</Label>
+                      <Label htmlFor="onsite-demo">Physical Meeting</Label>
                     </div>
                   </RadioGroup>
                 </div>
