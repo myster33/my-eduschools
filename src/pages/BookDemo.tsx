@@ -403,7 +403,7 @@ const BookDemo = () => {
       
       console.log('Form submission completed successfully');
     } catch (error) {
-      console.error('Error processing demo request:', error);
+      console.error('Error processing presentation request:', error);
       setIsSubmitting(false);
       
       // Show more specific error message
@@ -412,7 +412,7 @@ const BookDemo = () => {
       
       toast({
         title: "Submission Failed",
-        description: `Failed to process demo request: ${errorMessage}. Please try again or contact us directly.`,
+        description: `Failed to process presentation request: ${errorMessage}. Please try again or contact us directly.`,
         variant: "destructive",
       });
     }
@@ -432,7 +432,7 @@ const BookDemo = () => {
           <div className="text-center mb-8">
             <h1 className="text-4xl font-bold text-white mb-4">Talk to our Technical Team</h1>
             <p className="text-xl text-primary-100">
-              Fill out the form below to schedule your installation demo and know more about the product.
+              Fill out the form below to schedule your installation presentation and know more about the product.
             </p>
           </div>
           
@@ -567,9 +567,9 @@ const BookDemo = () => {
                 </div>
               </div>
 
-              {/* Demo Preferences */}
+              {/* Presentation Preferences */}
               <div className="space-y-4">
-                <h2 className="text-2xl font-semibold text-gray-800 border-b pb-2">Installation Demo Preferences</h2>
+                <h2 className="text-2xl font-semibold text-gray-800 border-b pb-2">Installation Presentation Preferences</h2>
                 
                 <div>
                   <Label>Specific Features You're Most Interested In</Label>
@@ -589,8 +589,8 @@ const BookDemo = () => {
                 </div>
 
                 <div>
-                  <Label className="text-base font-medium">Preferred Date and Time for Installation Demo *</Label>
-                  <p className="text-sm text-gray-600 mt-1 mb-3">Select your preferred date and time for the installation demo session</p>
+                  <Label className="text-base font-medium">Preferred Date and Time for Installation Presentation *</Label>
+                  <p className="text-sm text-gray-600 mt-1 mb-3">Select your preferred date and time for the installation presentation session</p>
                   <Dialog open={showDateTimePicker} onOpenChange={setShowDateTimePicker}>
                     <DialogTrigger asChild>
                       <Button
@@ -617,7 +617,7 @@ const BookDemo = () => {
                     <DialogContent className="sm:max-w-[900px] max-h-[90vh] overflow-y-auto">
                       <DialogHeader className="pb-4 border-b">
                         <DialogTitle className="text-xl font-semibold text-center">
-                          Schedule Your Installation Demo Session
+                          Schedule Your Installation Presentation Session
                         </DialogTitle>
                         <p className="text-sm text-gray-600 text-center mt-2">
                           Available Monday-Friday, 9:00 AM - 4:00 PM (Sundays shown in red)
@@ -735,7 +735,7 @@ const BookDemo = () => {
                 </div>
 
                 <div>
-                  <Label>Mode of Installation Demo *</Label>
+                  <Label>Mode of Installation Presentation *</Label>
                   <RadioGroup 
                     value={formData.demoMode} 
                     onValueChange={(value) => handleInputChange('demoMode', value)}
@@ -743,11 +743,11 @@ const BookDemo = () => {
                   >
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="online" id="online-demo" />
-                      <Label htmlFor="online-demo">Online Installation Demo</Label>
+                      <Label htmlFor="online-demo">Online Installation Presentation</Label>
                     </div>
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="onsite" id="onsite-demo" />
-                      <Label htmlFor="onsite-demo">Onsite Installation Demo</Label>
+                      <Label htmlFor="onsite-demo">Onsite Installation Presentation</Label>
                     </div>
                   </RadioGroup>
                 </div>
@@ -819,10 +819,10 @@ const BookDemo = () => {
           <AlertDialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
             <AlertDialogHeader>
               <AlertDialogTitle className="text-xl font-semibold text-center">
-                Confirm Your Installation Demo Request
+                Confirm Your Installation Presentation Request
               </AlertDialogTitle>
               <AlertDialogDescription className="text-center text-gray-600">
-                Please review your information before submitting your installation demo request.
+                Please review your information before submitting your installation presentation request.
               </AlertDialogDescription>
             </AlertDialogHeader>
             
@@ -851,11 +851,11 @@ const BookDemo = () => {
               </div>
 
               <div className="space-y-4">
-                <h3 className="font-semibold text-lg border-b pb-2">Installation Demo Preferences</h3>
+                <h3 className="font-semibold text-lg border-b pb-2">Installation Presentation Preferences</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
                   <div className="space-y-2">
-                    <p><span className="font-medium">Installation Demo Date:</span> {formData.preferredDemoDate}</p>
-                    <p><span className="font-medium">Installation Demo Time:</span> {formData.preferredDemoTime}</p>
+                    <p><span className="font-medium">Installation Presentation Date:</span> {formData.preferredDemoDate}</p>
+                    <p><span className="font-medium">Installation Presentation Time:</span> {formData.preferredDemoTime}</p>
                     <p><span className="font-medium">Mode:</span> {formData.demoMode}</p>
                     <p><span className="font-medium">Contact Method:</span> {formData.preferredContactMethod}</p>
                     <p><span className="font-medium">Implementation Timeframe:</span> {formData.timeframe}</p>
